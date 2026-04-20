@@ -34,7 +34,7 @@ from config import MEAL_PLANS
                 返回 {}
         返回 {}
     
-    def 保存学生(self):
+    定义 保存学生
         """保存学生数据"""
         with open(STUDENTS_FILE, 'w', encoding='utf-8') as f:
             json.dump(self.students, f, ensure_ascii=False, indent=2)
