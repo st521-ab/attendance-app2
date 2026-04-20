@@ -3,48 +3,48 @@
 定义套餐类型和默认价格
 """
 
-import os
+导入 os
 
 # 套餐类型
 MEAL_PLANS = {
     '午托': {
-        'name': '午托',
-        'description': '午餐+午休',
-        'default_price': 800,  # 默认月费
+        '名称': '午托',
+        '描述': '午餐+午休',
+        '默认价格': 800,  # 默认月费
     },
     '晚托': {
-        'name': '晚托',
-        'description': '晚餐+作业辅导',
-        'default_price': 1000,
+        '名称': '晚托',
+        '描述': '晚餐+作业辅导',
+        '默认价格': 1000,
     },
-    '全托': {
-        'name': '全托',
-        'description': '午餐+午休+晚餐+作业辅导',
-        'default_price': 1500,
+    全托: 
+        '名称': '全托',
+        '描述': '午餐+午休+晚餐+作业辅导',
+        '默认价格': 1500,
     },
 }
 
 # 每天工作日数量（用于退费计算）
-DEFAULT_WORKDAYS_PER_MONTH = 22
+每月默认工作日 =22
 
-def get_app_dir():
+获取应用目录():
     """获取APP私有目录"""
-    try:
+    尝试:
         # Android环境
-        from android.storage import app_storage_path
+        从 android.storage 导入 app_storage_path
         return app_storage_path()
     except ImportError:
         # 桌面环境：使用用户主目录下的隐藏文件夹
         return os.path.expanduser('~/.托管班考勤数据')
 
 # 数据文件路径
-DATA_DIR = os.path.join(get_app_dir(), 'attendance_data')
+DATA_DIR = os.path.join(获取应用目录(), 'attendance_data')
 STUDENTS_FILE = os.path.join(DATA_DIR, 'students.json')
 ATTENDANCE_FILE = os.path.join(DATA_DIR, 'attendance.json')
 CONFIG_FILE = os.path.join(DATA_DIR, 'config.json')
 
 # 确保数据目录存在
-def ensure_data_dir():
+定义 ensure_data_dir():
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR, exist_ok=True)
 
