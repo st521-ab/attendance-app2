@@ -3,21 +3,21 @@
 负责学生数据、考勤记录、账单的CRUD操作
 """
 
-import json
+导入json
 import os
-from datetime import datetime, date
-from config import (
+从日期时间导入日期时间、日期
+从配置导入 (
     STUDENTS_FILE, ATTENDANCE_FILE, CONFIG_FILE,
-    DEFAULT_WORKDAYS_PER_MONTH, ensure_data_dir
+默认工作日数，确保数据目录
 )
 # 导入套餐配置（使用引用，确保settings界面修改后生效）
 from config import MEAL_PLANS
 
-class DataManager:
+类数据管理器：
     """数据管理器类"""
     
     def __init__(self):
-        ensure_data_dir()
+        确保数据目录()
         self.students = self.load_students()
         self.attendance = self.load_attendance()
         self.config = self.load_config()
@@ -26,15 +26,15 @@ class DataManager:
     
     def load_students(self):
         """加载学生数据"""
-        if os.path.exists(STUDENTS_FILE):
+        如果os.path.exists(STUDENTS_FILE):
             try:
                 with open(STUDENTS_FILE, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                    返回json.加载(f)
             except:
-                return {}
-        return {}
+                返回 {}
+        返回 {}
     
-    def save_students(self):
+    def 保存学生(self):
         """保存学生数据"""
         with open(STUDENTS_FILE, 'w', encoding='utf-8') as f:
             json.dump(self.students, f, ensure_ascii=False, indent=2)
