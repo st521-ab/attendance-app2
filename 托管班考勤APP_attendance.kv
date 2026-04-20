@@ -1,0 +1,563 @@
+#:kivy 2.1.0
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+
+# 颜色变量
+#:set PRIMARY_COLOR get_color_from_hex('#1976D2')
+#:set ACCENT_COLOR get_color_from_hex('#FF5722')
+#:set SUCCESS_COLOR get_color_from_hex('#4CAF50')
+#:set WARNING_COLOR get_color_from_hex('#FFC107')
+#:set ERROR_COLOR get_color_from_hex('#F44336')
+#:set BG_COLOR get_color_from_hex('#F5F5F5')
+#:set CARD_BG get_color_from_hex('#FFFFFF')
+
+# 基础样式
+<FlatButton@Button>:
+    background_color: 0, 0, 0, 0
+    color: PRIMARY_COLOR
+    font_size: '16sp'
+
+<PrimaryButton@Button>:
+    background_color: PRIMARY_COLOR
+    color: 1, 1, 1, 1
+    font_size: '18sp'
+    bold: True
+    radius: [8]
+    height: '50dp'
+
+<Card@BoxLayout>:
+    orientation: 'vertical'
+    padding: 15
+    margin: 8
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        RoundedRectangle:
+            radius: [12]
+            pos: self.pos
+            size: self.size
+    elevation: 2
+
+# ==================== 考勤界面 ====================
+<AttendanceScreen>:
+    name: 'attendance'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        
+        # 顶部日期显示
+        Card:
+            size_hint_y: None
+            height: '100dp'
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: root.current_date
+                    font_size: '24sp'
+                    bold: True
+                    color: PRIMARY_COLOR
+                Label:
+                    text: f'应到: {root.student_count} 人  |  已到: {root.present_count} 人'
+                    font_size: '16sp'
+                    color: 0.4, 0.4, 0.4, 1
+        
+        # 快捷操作按钮
+        BoxLayout:
+            size_hint_y: None
+            height: '60dp'
+            spacing: 10
+            Button:
+                text: '📋 一键全到'
+                font_size: '16sp'
+                background_color: SUCCESS_COLOR
+                on_press: root.mark_all_present()
+        
+        # 学生考勤列表
+        ScrollView:
+            do_scroll_x: False
+            GridLayout:
+                cols: 1
+                spacing: 8
+                size_hint_y: None
+                height: self.minimum_height
+                padding: 5
+                
+                # 动态生成学生考勤卡片
+                Repeater:
+                    viewclass: 'AttendanceCard'
+                    model: root.attendance_data
+                    
+                    AttendanceCard:
+                        student_id: __key__
+                        student_name: __item__['name']
+                        meal_plan: __item__['meal_plan']
+                        is_present: __item__['is_present']
+                        status_text: __item__['status_text']
+                        on_tap: root.toggle_attendance(self.student_id)
+
+<AttendanceCard>:
+    size_hint_y: None
+    height: '80dp'
+    canvas.before:
+        Color:
+            rgba: SUCCESS_COLOR if is_present else ERROR_COLOR
+        RoundedRectangle:
+            radius: [12]
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: 15
+        spacing: 15
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 0.6
+            Label:
+                text: root.student_name
+                font_size: '20sp'
+                bold: True
+                color: 1, 1, 1, 1
+                halign: 'left'
+                text_size: self.size
+            Label:
+                text: root.meal_plan
+                font_size: '14sp'
+                color: 1, 1, 1, 0.8
+                halign: 'left'
+                text_size: self.size
+        Label:
+            text: root.status_text
+            font_size: '18sp'
+            bold: True
+            color: 1, 1, 1, 1
+            size_hint_x: 0.4
+
+# ==================== 学生管理界面 ====================
+<StudentScreen>:
+    name: 'students'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        
+        # 标题栏
+        Card:
+            size_hint_y: None
+            height: '80dp'
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: '学生列表'
+                    font_size: '24sp'
+                    bold: True
+                    color: PRIMARY_COLOR
+                Button:
+                    text: '+ 添加学生'
+                    size_hint_x: None
+                    width: '140dp'
+                    background_color: SUCCESS_COLOR
+                    font_size: '16sp'
+                    on_press: root.add_student_popup()
+        
+        # 学生列表
+        ScrollView:
+            do_scroll_x: False
+            GridLayout:
+                cols: 1
+                spacing: 8
+                size_hint_y: None
+                height: self.minimum_height
+                padding: 5
+                
+                Repeater:
+                    viewclass: 'StudentCard'
+                    model: root.students_list
+                    
+                    StudentCard:
+                        student_id: __key__
+                        student_name: __item__['name']
+                        meal_plan: __item__['meal_plan']
+                        monthly_price: __item__['monthly_price']
+                        on_edit: root.edit_student_popup(self.student_id)
+                        on_delete: root.delete_student(self.student_id)
+
+<StudentCard>:
+    size_hint_y: None
+    height: '100dp'
+    Card:
+        padding: 15
+        BoxLayout:
+            orientation: 'horizontal'
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.6
+                Label:
+                    text: root.student_name
+                    font_size: '20sp'
+                    bold: True
+                    color: 0.2, 0.2, 0.2, 1
+                    halign: 'left'
+                    text_size: self.size
+                Label:
+                    text: f'{root.meal_plan}  ¥{root.monthly_price}/月'
+                    font_size: '14sp'
+                    color: 0.5, 0.5, 0.5, 1
+                    halign: 'left'
+                    text_size: self.size
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_x: 0.4
+                spacing: 10
+                Button:
+                    text: '✏️'
+                    font_size: '20sp'
+                    size_hint_x: 0.5
+                    background_color: WARNING_COLOR
+                    on_press: root.on_edit()
+                Button:
+                    text: '🗑️'
+                    font_size: '20sp'
+                    size_hint_x: 0.5
+                    background_color: ERROR_COLOR
+                    on_press: root.on_delete()
+
+# ==================== 账单界面 ====================
+<BillScreen>:
+    name: 'bill'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        
+        # 月份选择器
+        Card:
+            size_hint_y: None
+            height: '80dp'
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 10
+                Button:
+                    text: '◀'
+                    font_size: '24sp'
+                    size_hint_x: 0.2
+                    background_color: PRIMARY_COLOR
+                    on_press: root.prev_month()
+                Label:
+                    text: root.get_month_text()
+                    font_size: '22sp'
+                    bold: True
+                    color: PRIMARY_COLOR
+                    size_hint_x: 0.6
+                Button:
+                    text: '▶'
+                    font_size: '24sp'
+                    size_hint_x: 0.2
+                    background_color: PRIMARY_COLOR
+                    on_press: root.next_month()
+        
+        # 汇总信息
+        Card:
+            size_hint_y: None
+            height: '120dp'
+            GridLayout:
+                cols: 2
+                spacing: 10
+                Label:
+                    text: f'工作日: {root.workdays}天'
+                    font_size: '16sp'
+                    color: 0.4, 0.4, 0.4, 1
+                Label:
+                    text: f'退费合计: ¥{root.total_refund}'
+                    font_size: '16sp'
+                    color: ERROR_COLOR
+                Label:
+                    text: f'总学生: {len(root.bill_data)}人'
+                    font_size: '16sp'
+                    color: 0.4, 0.4, 0.4, 1
+                Label:
+                    text: f'实收合计: ¥{root.total_actual}'
+                    font_size: '18sp'
+                    bold: True
+                    color: SUCCESS_COLOR
+        
+        # 账单明细表头
+        GridLayout:
+            size_hint_y: None
+            height: '45dp'
+            cols: 6
+            padding: 5
+            canvas.before:
+                Color:
+                    rgba: PRIMARY_COLOR
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Label:
+                text: '姓名'
+                bold: True
+                color: 1, 1, 1, 1
+                font_size: '13sp'
+            Label:
+                text: '套餐'
+                bold: True
+                color: 1, 1, 1, 1
+                font_size: '13sp'
+            Label:
+                text: '月费'
+                bold: True
+                color: 1, 1, 1, 1
+                font_size: '13sp'
+            Label:
+                text: '出勤'
+                bold: True
+                color: 1, 1, 1, 1
+                font_size: '13sp'
+            Label:
+                text: '请假'
+                bold: True
+                color: 1, 1, 1, 1
+                font_size: '13sp'
+            Label:
+                text: '实收'
+                bold: True
+                color: 1, 1, 1, 1
+                font_size: '13sp'
+        
+        # 账单明细列表
+        ScrollView:
+            do_scroll_x: False
+            GridLayout:
+                cols: 6
+                spacing: 2
+                size_hint_y: None
+                height: self.minimum_height
+                padding: [0, 0, 0, 10]
+                
+                Repeater:
+                    viewclass: 'BillItem'
+                    model: root.bill_data
+                    
+                    BillItem:
+                        student_name: __item__['name']
+                        meal_plan: __item__['meal_plan']
+                        monthly_price: __item__['monthly_price']
+                        present_days: __item__['present_days']
+                        absent_days: __item__['absent_days']
+                        actual_amount: __item__['actual_amount']
+
+<BillItem>:
+    size_hint_y: None
+    height: '50dp'
+    canvas.before:
+        Color:
+            rgba: 0.95, 0.95, 0.95, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    Label:
+        text: root.student_name
+        font_size: '12sp'
+        color: 0.2, 0.2, 0.2, 1
+    Label:
+        text: root.meal_plan
+        font_size: '11sp'
+        color: 0.4, 0.4, 0.4, 1
+    Label:
+        text: f'¥{root.monthly_price}'
+        font_size: '12sp'
+        color: 0.2, 0.2, 0.2, 1
+    Label:
+        text: f'{root.present_days}天'
+        font_size: '12sp'
+        color: SUCCESS_COLOR
+    Label:
+        text: f'{root.absent_days}天'
+        font_size: '12sp'
+        color: ERROR_COLOR
+    Label:
+        text: f'¥{root.actual_amount}'
+        font_size: '13sp'
+        bold: True
+        color: PRIMARY_COLOR
+
+# ==================== 设置界面 ====================
+<SettingsScreen>:
+    name: 'settings'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        
+        # 标题
+        Card:
+            size_hint_y: None
+            height: '80dp'
+            Label:
+                text: '套餐价格设置'
+                font_size: '24sp'
+                bold: True
+                color: PRIMARY_COLOR
+        
+        # 套餐价格列表
+        ScrollView:
+            do_scroll_x: False
+            GridLayout:
+                cols: 1
+                spacing: 10
+                size_hint_y: None
+                height: self.minimum_height
+                padding: 5
+                
+                Repeater:
+                    viewclass: 'PriceSettingCard'
+                    model: root.plan_prices
+                    
+                    PriceSettingCard:
+                        plan_name: __item__['name']
+                        plan_price: __item__['price']
+                        plan_description: __item__['description']
+
+<PriceSettingCard>:
+    size_hint_y: None
+    height: '100dp'
+    Card:
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: 15
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.6
+                Label:
+                    text: root.plan_name
+                    font_size: '20sp'
+                    bold: True
+                    color: 0.2, 0.2, 0.2, 1
+                Label:
+                    text: root.plan_description
+                    font_size: '13sp'
+                    color: 0.5, 0.5, 0.5, 1
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_x: 0.4
+                spacing: 10
+                TextInput:
+                    text: str(root.plan_price)
+                    input_filter: 'float'
+                    font_size: '18sp'
+                    halign: 'center'
+                    multiline: False
+                    on_text_validate: root.parent.parent.update_price(root.plan_name, self.text)
+                Label:
+                    text: '元/月'
+                    font_size: '14sp'
+                    color: 0.4, 0.4, 0.4, 1
+        
+        BoxLayout:
+            size_hint_y: None
+            height: '50dp'
+            padding: [15, 0, 15, 10]
+            Button:
+                text: '保存价格'
+                background_color: PRIMARY_COLOR
+                font_size: '16sp'
+                on_press: root.parent.parent.update_price(root.plan_name, self.parent.children[1].text)
+
+# ==================== 主界面布局 ====================
+ScreenManager:
+    AttendanceScreen:
+    StudentScreen:
+    BillScreen:
+    SettingsScreen:
+    
+    # 底部导航栏
+    BoxLayout:
+        size_hint_y: None
+        height: '60dp'
+        pos_hint: {'bottom': 1}
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1
+            Line:
+                points: [self.x, self.top, self.right, self.top]
+                width: 1
+        
+        # 考勤按钮
+        Button:
+            background_color: PRIMARY_COLOR if self.state == 'down' else (1, 1, 1, 1)
+            on_release: 
+                sm.current = 'attendance'
+                sm.get_screen('attendance').refresh()
+            BoxLayout:
+                orientation: 'vertical'
+                padding: 5
+                Label:
+                    text: '📋'
+                    font_size: '24sp'
+                    halign: 'center'
+                Label:
+                    text: '考勤'
+                    font_size: '14sp'
+                    color: PRIMARY_COLOR if self.state == 'down' else (0.4, 0.4, 0.4, 1)
+                    halign: 'center'
+        
+        # 学生按钮
+        Button:
+            background_color: PRIMARY_COLOR if self.state == 'down' else (1, 1, 1, 1)
+            on_release:
+                sm.current = 'students'
+                sm.get_screen('students').refresh()
+            BoxLayout:
+                orientation: 'vertical'
+                padding: 5
+                Label:
+                    text: '👥'
+                    font_size: '24sp'
+                    halign: 'center'
+                Label:
+                    text: '学生'
+                    font_size: '14sp'
+                    color: PRIMARY_COLOR if self.state == 'down' else (0.4, 0.4, 0.4, 1)
+                    halign: 'center'
+        
+        # 账单按钮
+        Button:
+            background_color: PRIMARY_COLOR if self.state == 'down' else (1, 1, 1, 1)
+            on_release:
+                sm.current = 'bill'
+                sm.get_screen('bill').load_bill()
+            BoxLayout:
+                orientation: 'vertical'
+                padding: 5
+                Label:
+                    text: '📊'
+                    font_size: '24sp'
+                    halign: 'center'
+                Label:
+                    text: '账单'
+                    font_size: '14sp'
+                    color: PRIMARY_COLOR if self.state == 'down' else (0.4, 0.4, 0.4, 1)
+                    halign: 'center'
+        
+        # 设置按钮
+        Button:
+            background_color: PRIMARY_COLOR if self.state == 'down' else (1, 1, 1, 1)
+            on_release:
+                sm.current = 'settings'
+                sm.get_screen('settings').refresh()
+            BoxLayout:
+                orientation: 'vertical'
+                padding: 5
+                Label:
+                    text: '⚙️'
+                    font_size: '24sp'
+                    halign: 'center'
+                Label:
+                    text: '设置'
+                    font_size: '14sp'
+                    color: PRIMARY_COLOR if self.state == 'down' else (0.4, 0.4, 0.4, 1)
+                    halign: 'center'
