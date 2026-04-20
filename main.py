@@ -4,7 +4,7 @@
 """
 
 import os
-import sys
+导入sys
 
 # 设置Kivy环境
 os.environ['KIVY_AUDIO'] = 'sdl2'
@@ -14,7 +14,7 @@ from kivy.config import Config
 Config.set('kivy', 'window_icon', '')
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
-from kivy import require
+从kivy导入require
 require('2.1.0')
 
 from kivy.app import App
@@ -25,16 +25,16 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
-from kivy.uix.popup import Popup
-from kivy.uix.spinner import Spinner
-from kivy.uix.recycleview import RecycleView
-from kivy.properties import (
-    StringProperty, ListProperty, BooleanProperty, 
+从kivy.uix.弹出窗口导入Popup
+从kivy.uix.spinner导入Spinner
+从kivy.uix.recycleview导入RecycleView
+从kivy.properties导入 (
+字符串属性、列表属性、布尔属性
     NumericProperty, ObjectProperty
 )
-from kivy.clock import Clock
-from kivy.core.window import Window
-from kivy.utils import get_color_from_hex
+从kivy.clock导入Clock
+从kivy.core.window导入Window
+从kivy.utils导入get_color_from_hex
 from kivy.graphics import Color, RoundedRectangle, Rectangle, Line
 
 from datetime import date, datetime
