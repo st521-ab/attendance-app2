@@ -5,24 +5,24 @@
 #:set PRIMARY_COLOR get_color_from_hex('#1976D2')
 #:set ACCENT_COLOR get_color_from_hex('#FF5722')
 #:set SUCCESS_COLOR get_color_from_hex('#4CAF50')
-#:set WARNING_COLOR get_color_from_hex('#FFC107')
-#:set ERROR_COLOR get_color_from_hex('#F44336')
-#:set BG_COLOR get_color_from_hex('#F5F5F5')
+#:设置警告颜色 从十六进制获取颜色('#FFC107')
+#:设置错误颜色 从十六进制获取颜色('#F44336')
+#:设置背景颜色 从十六进制获取颜色('#F5F5F5')
 #:set CARD_BG get_color_from_hex('#FFFFFF')
 
 # 基础样式
 <FlatButton@Button>:
-    background_color: 0, 0, 0, 0
-    color: PRIMARY_COLOR
-    font_size: '16sp'
+背景颜色：0, 0, 0, 0
+颜色：PRIMARY_COLOR
+字体大小: '16sp'
 
 <PrimaryButton@Button>:
-    background_color: PRIMARY_COLOR
-    color: 1, 1, 1, 1
-    font_size: '18sp'
-    bold: True
-    radius: [8]
-    height: '50dp'
+背景颜色: PRIMARY_COLOR
+颜色: 1, 1, 1, 1
+字体大小: '18sp'
+加粗: True
+圆角: [8]
+高度: '50dp'
 
 <Card@BoxLayout>:
     orientation: 'vertical'
